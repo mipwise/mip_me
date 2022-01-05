@@ -1,4 +1,4 @@
 from mip_me import schemas
-
-primary_keys = schemas.input_schema.primary_key_fields
+input_schema = schemas.input_schema
+primary_keys = input_schema.primary_key_fields
 print(primary_keys)
