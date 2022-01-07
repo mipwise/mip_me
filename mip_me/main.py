@@ -1,33 +1,41 @@
-"""
-Contains the solve code that calls the cure engine.
+from mip_me import output_schema
 
-Created by Aster Santana (Aug, 2021), MipMaster.org.
-"""
-
-from mip_start import data_bridge
-from mip_start.schemas import input_schema
-from mip_start.opt_model_pulp import OptModel
+import gurobipy as gp
+import pandas as pd
 
 
 def solve(dat):
-    """
-    Main solve engine.
+    # Prepare optimization parameters
+    I = set(dat.foods['Food ID'])
+    J = set(dat.nutrients['Nutrient ID'])
+    nl = dict(zip(dat.nutrients['Nutrient ID'], dat.nutrients['Min Intake']))
+    nu = dict(zip(dat.nutrients['Nutrient ID'], dat.nutrients['Max Intake']))
+    nq = dict(zip(zip(dat.foods_nutrients['Food ID'], dat.foods_nutrients['Nutrient ID']),
+                  dat.foods_nutrients['Quantity']))
+    c = dict(zip(dat.foods['Food ID'], dat.foods['Per Unit Cost']))
 
-    Instantiates classes and calls methods that perform the following tasks:
-    - prepare the input data
-    - build and solves the optimization model
-    - retrieves the solution (if one exists) and populates the output schema.
+    # Build optimization model
+    mdl = gp.Model("diet_problem")
+    x = mdl.addVars(I, vtype=gp.GRB.CONTINUOUS, name='x')
+    mdl.addConstrs((sum(nq[i, j] * x[i] for i in I) >= nl[j] for j in J), name='min_nutrients')
+    mdl.addConstrs((sum(nq[i, j] * x[i] for i in I) <= nu[j] for j in J), name='max_nutrients')
+    mdl.setObjective(sum(c[i] * x[i] for i in I), sense=gp.GRB.MINIMIZE)
 
-    :param dat: An object that contains all input tables as attributes (for example, a PanDat object from TicDat).
-    :return sln: An object that contains all output tables as attributes (for example, a PanDat object from TicDat).
-    """
-    params = input_schema.create_full_parameters_dict(dat)
-    dat_in = data_bridge.DatIn(dat, params)
-    opt_model = OptModel(dat_in, 'diet_problem')
-    opt_model.build_base_model()
-    if params['Food Cost'] == 'Include delivery cost':
-        opt_model.add_complexity_charge_delivery_cost()
-    opt_model.optimize()
-    dat_out = data_bridge.DatOut(opt_model.sol)
-    sln = dat_out.populate_output_schema(dat)
+    # Optimize and retrieve the solution
+    mdl.optimize()
+    if mdl.status == gp.GRB.OPTIMAL:
+        x_sol = [(key, var.X) for key, var in x.items()]
+    else:
+        x_sol = None
+        print(f'Model is not optimal. Status: {mdl.status}')
+
+    # Populate output schema
+    sln = output_schema.PanDat()
+    if x_sol:
+        x_df = pd.DataFrame(x_sol, columns=['Food ID', 'Quantity'])
+        # populate buy table
+        buy_df = x_df.merge(dat.foods[['Food ID', 'Food Name']], on='Food ID', how='left')
+        buy_df = buy_df.round({'Quantity': 2})
+        buy_df = buy_df.astype({'Food ID': str, 'Food Name': str, 'Quantity': 'Float64'})
+        sln.buy = buy_df[['Food ID', 'Food Name', 'Quantity']]
     return sln
