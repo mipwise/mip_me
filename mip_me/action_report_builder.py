@@ -1,5 +1,5 @@
 
-def build_report_solve(dat, sln):
+def report_builder_solve(dat, sln):
     buy_df = sln.buy[['Food ID', 'Quantity']]
     nutrients_df = dat.nutrients[['Nutrient ID', 'Nutrient Name']]
     foods_nutrients_df = dat.foods_nutrients[['Food ID', 'Nutrient ID', 'Quantity']]
