@@ -16,7 +16,7 @@ actions_config = {
     }
 
 input_tables_config = {
-    'hidden': ['parameters'],
+    'hidden_tables': ['parameters'],
     'categories': {
         'Master Tables': ['foods', 'nutrients'],
         'Composition Data': ['foods_nutrients']},
@@ -27,30 +27,28 @@ input_tables_config = {
         'foods': {'Per Unit Cost': 'Cost ($/unit)',
                   'Fixed Cost': 'Fixed Cost ($)'},
         'nutrients': {'Min Intake': 'Minimum Intake',
-                      'Max Intake': 'Maximum Intake'}}
+                      'Max Intake': 'Maximum Intake'}},
+    'hidden_columns': {
+        'foods': ['Food ID'],
+        'nutrients': ['Nutrient ID'],
+        'foods_nutrients': ['Food ID', 'Nutrient ID']}
     }
 
 output_tables_config = {
-    'hidden': [],
-    'categories': {},
+    'hidden_tables': [],
+    'categories': dict(),
     'order': ['buy', 'nutrition'],
-    'tables_display_names': {},
-    'columns_display_names': {}
+    'tables_display_names': dict(),
+    'columns_display_names': dict(),
+    'hidden_columns': dict()
     }
 
 parameters_config = {
     'hidden': [],
-    'categories': {},
+    'categories': dict(),
     'order': ['Food Cost', 'Food Portions'],
     'tool_tips': {
         'Food Portions': "Whether fractional portions may compose the diet or only whole portions must be used",
         'Food Cost Multiplier': "The factor used by the Update Food Cost action to change food cost"
         }
     }
-
-app_config = {
-    'input_tables_config': input_tables_config,
-    'parameters_config': parameters_config,
-    'output_tables_config': output_tables_config,
-    'actions_config': actions_config
-}
