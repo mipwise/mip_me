@@ -1,4 +1,4 @@
-__version__ = "0.1.10"
+__version__ = "0.2.2"
 from mip_me.schemas import input_schema, output_schema
 from mip_me.action_update_food_cost import update_food_cost_solve
 from mip_me.main import solve
@@ -24,8 +24,7 @@ input_tables_config = {
     'tables_display_names': {
         'foods_nutrients': 'Foods Composition'},
     'columns_display_names': {
-        'foods': {'Per Unit Cost': 'Cost ($/unit)',
-                  'Fixed Cost': 'Fixed Cost ($)'},
+        'foods': {'Per Unit Cost': 'Cost ($/unit)'},
         'nutrients': {'Min Intake': 'Minimum Intake',
                       'Max Intake': 'Maximum Intake'}},
     'hidden_columns': {
