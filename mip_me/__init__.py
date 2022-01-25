@@ -1,4 +1,4 @@
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 from mip_me.schemas import input_schema, output_schema
 from mip_me.action_update_food_cost import update_food_cost_solve
 from mip_me.main import solve
@@ -20,7 +20,7 @@ input_tables_config = {
     'categories': {
         'Master Tables': ['foods', 'nutrients'],
         'Composition Data': ['foods_nutrients']},
-    'order': [],
+    'order': list(),
     'tables_display_names': {
         'foods_nutrients': 'Foods Composition'},
     'columns_display_names': {
@@ -34,7 +34,7 @@ input_tables_config = {
     }
 
 output_tables_config = {
-    'hidden_tables': [],
+    'hidden_tables': list(),
     'categories': dict(),
     'order': ['buy', 'nutrition'],
     'tables_display_names': dict(),
@@ -43,7 +43,7 @@ output_tables_config = {
     }
 
 parameters_config = {
-    'hidden': [],
+    'hidden': list(),
     'categories': dict(),
     'order': ['Food Cost', 'Food Portions'],
     'tooltips': {
