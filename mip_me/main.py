@@ -1,6 +1,6 @@
 from mip_me import output_schema
 
-import gurobipy as gp
+import pulp
 import pandas as pd
 
 
@@ -15,19 +15,21 @@ def solve(dat):
     c = dict(zip(dat.foods['Food ID'], dat.foods['Per Unit Cost']))
 
     # Build optimization model
-    mdl = gp.Model("diet_problem")
-    x = mdl.addVars(I, vtype=gp.GRB.CONTINUOUS, name='x')
-    mdl.addConstrs((sum(nq[i, j] * x[i] for i in I) >= nl[j] for j in J), name='min_nutrients')
-    mdl.addConstrs((sum(nq[i, j] * x[i] for i in I) <= nu[j] for j in J), name='max_nutrients')
-    mdl.setObjective(sum(c[i] * x[i] for i in I), sense=gp.GRB.MINIMIZE)
+    mdl = pulp.LpProblem("diet_problem", sense=pulp.LpMinimize)
+    x = pulp.LpVariable.dicts(indexs=I, cat=pulp.LpContinuous, lowBound=0.0, name='x')
+    for j in J:
+        mdl.addConstraint(sum(nq[i, j] * x[i] for i in I) >= nl[j], name=f'nl_{j}')
+        mdl.addConstraint(sum(nq[i, j] * x[i] for i in I) <= nu[j], name=f'nu_{j}')
+    mdl.setObjective(sum(c[i] * x[i] for i in I))
 
     # Optimize and retrieve the solution
-    mdl.optimize()
-    if mdl.status == gp.GRB.OPTIMAL:
-        x_sol = [(key, var.X) for key, var in x.items()]
+    mdl.solve()
+    status = pulp.LpStatus[mdl.status]
+    if status == 'Optimal':
+        x_sol = [(key, var.value()) for key, var in x.items()]
     else:
         x_sol = None
-        print(f'Model is not optimal. Status: {mdl.status}')
+        print(f'Model is not optimal. Status: {status}')
 
     # Populate output schema
     sln = output_schema.PanDat()
