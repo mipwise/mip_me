@@ -1,59 +1,55 @@
-from mip_me import input_schema, output_schema
-from mip_me import update_food_cost_solve
-from mip_me import solve
-from mip_me import report_builder_solve
-
-import os
+import mip_me
 import inspect
+import os
 
 
 def _this_directory():
     return os.path.dirname(os.path.realpath(os.path.abspath(inspect.getsourcefile(_this_directory))))
 
 
-def read_xls_data(schema, data):
-    path = os.path.join(_this_directory(), "data", data)
+def read_data(input_data, schema):
+    print(f'Reading data from: {input_data}')
+    path = os.path.join(_this_directory(), "data", input_data)
     assert os.path.exists(path), f"bad path {path}"
-    print(f'Reading data from: {data}')
-    return schema.xls.create_pan_dat(path)
-
-
-def read_csv_data(schema, data):
-    path = os.path.join(_this_directory(), "data", data)
-    assert os.path.exists(path), f"bad path {path}"
-    print(f'Reading data from: {data}')
+    if input_data.endswith("xlsx"):
+        return schema.xls.create_pan_dat(path)
     return schema.csv.create_pan_dat(path)
 
 
-def write_csv_data(dat_sln, schema, solution_dir):
-    path = os.path.join(_this_directory(), "data", solution_dir)
+def write_data(sln, output_data, schema):
+    print(f'Writing data back to: {output_data}')
+    path = os.path.join(_this_directory(), "data", output_data)
     assert os.path.exists(path), f"bad path {path}"
-    print(f'Writing data back to: {solution_dir}')
-    return schema.csv.write_directory(dat_sln, path)
+    if output_data.endswith("xlsx"):
+        return schema.xls.write_file(sln, path)
+    return schema.csv.write_directory(sln, path)
 
 
-engine = {0: 'Data Ingestion',
-          1: 'Action Update Food Cost',
-          2: 'Main Solve',
-          3: 'Action Report Builder'}[3]
-
-if engine == 'Data Ingestion':
-    dat = read_xls_data(input_schema, 'testing_data.xlsx')
-    write_csv_data(dat, input_schema, 'inputs')
-elif engine == 'Action Update Food Cost':
-    dat = read_csv_data(input_schema, 'inputs')
-    dat = update_food_cost_solve(dat)
-    write_csv_data(dat, input_schema, 'inputs')
-elif engine == 'Main Solve':
-    dat = read_csv_data(input_schema, 'inputs')
-    sln = solve(dat)
-    write_csv_data(sln, output_schema, 'outputs')
-elif engine == 'Action Report Builder':
-    dat = read_csv_data(input_schema, 'inputs')
-    sln = read_csv_data(output_schema, 'outputs')
-    sln = report_builder_solve(dat, sln)
-    write_csv_data(sln, output_schema, 'outputs')
-else:
-    raise ValueError('Bad engine')
-
+if __name__ == "__main__":
+    _input_data = {1: "testing_data.xlsx",  # Loads data from the 'data/test_data_1.xlsx' workbook.
+                   2: "testing_data_2",  # Loads data from csv files in the 'data/test_data_2' directory.
+                   3: "inputs"}[1]  # Loads data from csv files in the 'data/inputs' directory.
+    engine = {1: 'Action Data Ingestion',
+              2: 'Update Food Cost',
+              3: 'Main Solve',
+              4: 'Report Builder'}[4]
+    if engine == 'Action Data Ingestion':
+        # Pools the data from '_input_data' and place it in the 'data/inputs' directory.
+        dat = read_data(_input_data, mip_me.input_schema)
+        write_data(dat, 'inputs', mip_me.input_schema)
+    elif engine == 'Update Food Cost':
+        dat = read_data(_input_data, mip_me.input_schema)
+        dat = mip_me.action_update_food_cost.update_food_cost_solve(dat)
+        write_data(dat, 'inputs', mip_me.input_schema)
+    elif engine == 'Main Solve':
+        dat = read_data(_input_data, mip_me.input_schema)
+        _sln = mip_me.solve(dat)
+        write_data(_sln, 'outputs', mip_me.output_schema)
+    elif engine == 'Report Builder':
+        dat = read_data(_input_data, mip_me.input_schema)
+        _sln = read_data('outputs', mip_me.output_schema)
+        _sln = mip_me.action_report_builder.report_builder_solve(dat, _sln)
+        write_data(_sln, 'outputs', mip_me.output_schema)
+    else:
+        raise ValueError('Bad engine')
 
