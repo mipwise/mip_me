@@ -18,6 +18,14 @@ input_schema.add_parameter('Food Portions', default_value='Ensure whole portions
                            strings_allowed=['Ensure whole portions', 'Portions can be fractional'])
 input_schema.add_parameter('Food Cost Multiplier', default_value=1.5, number_allowed=True, strings_allowed=(),
                            must_be_int=False, min=0.0, inclusive_min=True, max=10, inclusive_max=True)
+input_schema.add_parameter('Time Limit', default_value=120, number_allowed=True, strings_allowed=(),
+                           must_be_int=False, min=0.0, inclusive_min=True, max=1*60**2, inclusive_max=True)
+input_schema.add_parameter('MIP Gap', default_value=0.01, number_allowed=True, strings_allowed=(),
+                           min=0, inclusive_min=False, max=1, inclusive_max=False)
+input_schema.add_parameter('Feasibility', default_value='Flexible', number_allowed=False,
+                           strings_allowed=['Strict', 'Flexible'])
+input_schema.add_parameter('Violation Penalty', default_value=20, number_allowed=True, strings_allowed=(),
+                           min=0, inclusive_min=True, max=10000, inclusive_max=True)
 # endregion
 
 # region OUTPUT SCHEMA
@@ -44,7 +52,9 @@ input_schema.set_data_type(table=table, field='Min Intake', number_allowed=True,
 input_schema.set_data_type(table=table, field='Max Intake', number_allowed=True, strings_allowed=(),
                            min=0, inclusive_min=True, max=float('inf'), inclusive_max=False, nullable=True)
 input_schema.add_data_row_predicate(table=table, predicate_name='Min Intake <= Max Intake',
-                                    predicate=lambda row: row['Min Intake'] <= row['Max Intake'])
+                                    predicate=lambda row: row['Min Intake'] <= row['Max Intake']
+                                    if row['Min Intake'] == row['Min Intake'] and
+                                    row['Max Intake'] == row['Max Intake'] else True)
 # endregion
 # region foods_nutrients
 table = 'foods_nutrients'

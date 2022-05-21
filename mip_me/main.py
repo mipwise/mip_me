@@ -1,10 +1,12 @@
 from mip_me import output_schema
+from mip_me import input_schema
 
 import pulp
 import pandas as pd
 
 
 def solve(dat):
+    params = input_schema.create_full_parameters_dict(dat)
     # Prepare optimization parameters
     I = set(dat.foods['Food ID'])
     J = set(dat.nutrients['Nutrient ID'])
@@ -16,17 +18,35 @@ def solve(dat):
 
     # Build optimization model
     mdl = pulp.LpProblem("diet_problem", sense=pulp.LpMinimize)
-    x = pulp.LpVariable.dicts(indexs=I, cat=pulp.LpContinuous, lowBound=0.0, name='x')
+    if params['Food Portions'] == 'Ensure whole portions':
+        x = pulp.LpVariable.dicts(indexs=I, cat=pulp.LpInteger, lowBound=0.0, name='x')
+    else:
+        x = pulp.LpVariable.dicts(indexs=I, cat=pulp.LpContinuous, lowBound=0.0, name='x')
+    yu = pulp.LpVariable.dicts(indexs=J, cat=pulp.LpContinuous, lowBound=0.0, name='yu')
+    yl = pulp.LpVariable.dicts(indexs=J, cat=pulp.LpContinuous, lowBound=0.0, name='yl')
     for j in J:
-        mdl.addConstraint(sum(nq[i, j] * x[i] for i in I) >= nl[j], name=f'nl_{j}')
-        mdl.addConstraint(sum(nq[i, j] * x[i] for i in I) <= nu[j], name=f'nu_{j}')
-    mdl.setObjective(sum(c[i] * x[i] for i in I))
+        if nl[j] == nl[j]:
+            mdl.addConstraint(pulp.lpSum(nq.get((i, j), 0) * x[i] for i in I) >= nl[j] - yl[j], name=f'nl_{j}')
+        if nu[j] == nu[j]:
+            mdl.addConstraint(pulp.lpSum(nq.get((i, j), 0) * x[i] for i in I) <= nu[j] + yu[j], name=f'nu_{j}')
+        if params['Feasibility'] == 'Flexible':
+            yl[j].upBound = nl[j]
+        else:
+            yl[j].upBound = 0.0
+            yu[j].upBound = 0.0
+    mdl.setObjective(pulp.lpSum(c[i] * x[i] for i in I)
+                     + params['Violation Penalty'] * pulp.lpSum(yu[j] for j in J)
+                     + params['Violation Penalty'] * pulp.lpSum(yl[j] for j in J))
 
     # Optimize and retrieve the solution
     mdl.solve()
-    status = pulp.LpStatus[mdl.status]
+    status = mdl.solve(pulp.PULP_CBC_CMD(timeLimit=params['Time Limit'], gapRel=params['MIP Gap']))
+    status = pulp.LpStatus[status]
     if status == 'Optimal':
         x_sol = [(key, var.value()) for key, var in x.items()]
+        yl_sol = [(key, var.value()) for key, var in yl.items()]
+        yu_sol = [(key, var.value()) for key, var in yu.items()]
+        print(f'Optimal solution found!')
     else:
         x_sol = None
         print(f'Model is not optimal. Status: {status}')

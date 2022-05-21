@@ -1,4 +1,4 @@
-__version__ = "0.2.9"
+__version__ = "0.2.19"
 from mip_me.schemas import input_schema, output_schema
 from mip_me.action_update_food_cost import update_food_cost_solve
 from mip_me.main import solve
@@ -43,11 +43,16 @@ output_tables_config = {
     }
 
 parameters_config = {
-    'hidden': list(),
-    'categories': dict(),
-    'order': ['Food Cost', 'Food Portions'],
+    'hidden': ['MIP Gap'],
+    'categories':
+        {'Business Problem Configurations': ['Food Cost Multiplier', 'Food Portions'],
+         'Optimization Configuration': ['Feasibility', 'Violation Penalty', 'Time Limit']},
+    'order': list(),
     'tooltips': {
         'Food Portions': "Whether fractional portions may compose the diet or only whole portions must be used",
-        'Food Cost Multiplier': "The factor used by the Update Food Cost action to change food cost"
+        'Food Cost Multiplier': "The factor used by the Update Food Cost action to change food cost",
+        'Feasibility': "Whether violating min and max amount of nutrients is allowed or not",
+        'Violation Penalty': "Violation penalty for when the 'Feasibility' parameter is set to 'Flexible'",
+        'Time Limit': "Max number of seconds the optimization can run"
         }
     }
