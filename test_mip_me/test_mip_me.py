@@ -2,6 +2,7 @@ import mip_me
 import unittest
 import inspect
 import os
+from math import isclose
 
 
 def _this_directory():
@@ -57,16 +58,15 @@ def write_data(sln, output_data_loc, schema):
     return None
 
 
-def _nearly_same(x, y, epsilon=1e-5):
-    if x == y or max(abs(x), abs(y)) < epsilon:
-        return True
-    return abs(x-y) / min(abs(x), abs(y)) < epsilon
+class TestWhateverImTesting(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.dat = read_data("testing_data.xlsx", mip_me.input_schema)
 
-class MyTestCase(unittest.TestCase):
     def test_action_data_ingestion(self):
         # Pools the data from '_input_data' and place it in the 'data/inputs' directory.
-        dat = read_data("testing_data.xlsx", mip_me.input_schema)
+        dat = self.dat
         self.assertTrue(mip_me.input_schema.good_pan_dat_object(dat), "bad dat check")
         self.assertDictEqual(mip_me.input_schema.find_duplicates(dat), dict(), "duplicate row check")
         self.assertDictEqual(mip_me.input_schema.find_foreign_key_failures(dat), dict(), "foreign key check")
@@ -79,11 +79,12 @@ class MyTestCase(unittest.TestCase):
         params = mip_me.input_schema.create_full_parameters_dict(dat)
         total_cost_old = params['Food Cost Multiplier'] * dat.foods['Per Unit Cost'].sum()
         dat_ = mip_me.action_update_food_cost.update_food_cost_solve(dat)
-        self.assertTrue(_nearly_same(total_cost_old, dat_.foods['Per Unit Cost'].sum()), "food cost update check")
+        self.assertTrue(isclose(total_cost_old, dat_.foods['Per Unit Cost'].sum(), rel_tol=1e-5),
+                        "food cost update check")
         write_data(dat_, 'inputs', mip_me.input_schema)
 
     def test_main_solve_testing_data(self):
-        dat = read_data('testing_data.xlsx', mip_me.input_schema)
+        dat = self.dat
         sln = mip_me.solve(dat)
         df = sln.buy
         quantities_dict = {'f1': 0.0, 'f2': 0.0, 'f3': 667}
@@ -91,10 +92,11 @@ class MyTestCase(unittest.TestCase):
         write_data(sln, 'outputs', mip_me.output_schema)
 
     def test_report_builder(self):
-        dat = read_data('testing_data.xlsx', mip_me.input_schema)
+        dat = self.dat
         sln = read_data('outputs', mip_me.output_schema)
         sln = mip_me.action_report_builder.report_builder_solve(dat, sln)
-        self.assertTrue(_nearly_same(sln.nutrition['Quantity'].sum(), 250.37, 1e-2), "total nutrition quantity check")
+        self.assertTrue(isclose(sln.nutrition['Quantity'].sum(), 250.37, rel_tol=1e-2),
+                        "total nutrition quantity check")
         write_data(sln, 'outputs', mip_me.output_schema)
 
 
