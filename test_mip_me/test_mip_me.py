@@ -58,7 +58,7 @@ def write_data(sln, output_data_loc, schema):
     return None
 
 
-class TestWhateverImTesting(unittest.TestCase):
+class TestMipMe(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -79,7 +79,7 @@ class TestWhateverImTesting(unittest.TestCase):
         params = mip_me.input_schema.create_full_parameters_dict(dat)
         total_cost_old = params['Food Cost Multiplier'] * dat.foods['Per Unit Cost'].sum()
         dat_ = mip_me.action_update_food_cost.update_food_cost_solve(dat)
-        self.assertTrue(isclose(total_cost_old, dat_.foods['Per Unit Cost'].sum(), rel_tol=1e-5),
+        self.assertTrue(isclose(total_cost_old, dat_.foods['Per Unit Cost'].sum(), rel_tol=1e-2),
                         "food cost update check")
         write_data(dat_, 'inputs', mip_me.input_schema)
 
