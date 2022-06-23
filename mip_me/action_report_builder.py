@@ -1,5 +1,6 @@
 
 def report_builder_solve(dat, sln):
+    """Sample output action that populates the nutrition table (which could have been populated in the main solve)."""
     buy_df = sln.buy[['Food ID', 'Quantity']]
     nutrients_df = dat.nutrients[['Nutrient ID', 'Nutrient Name']]
     foods_nutrients_df = dat.foods_nutrients[['Food ID', 'Nutrient ID', 'Quantity']]

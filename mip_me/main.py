@@ -6,6 +6,8 @@ import pandas as pd
 
 
 def solve(dat):
+    """Main solve engine that prepares the data, builds and solve the optimization model, and populates the buy table
+    from the output of the optimization."""
     params = input_schema.create_full_parameters_dict(dat)
     # Prepare optimization parameters
     I = set(dat.foods['Food ID'])
@@ -44,8 +46,6 @@ def solve(dat):
     status = pulp.LpStatus[status]
     if status == 'Optimal':
         x_sol = [(key, var.value()) for key, var in x.items()]
-        yl_sol = [(key, var.value()) for key, var in yl.items()]
-        yu_sol = [(key, var.value()) for key, var in yu.items()]
         print(f'Optimal solution found!')
     else:
         x_sol = None

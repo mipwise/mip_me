@@ -22,7 +22,7 @@ input_schema.add_parameter('Time Limit', default_value=120, number_allowed=True,
                            must_be_int=False, min=0.0, inclusive_min=True, max=1*60**2, inclusive_max=True)
 input_schema.add_parameter('MIP Gap', default_value=0.01, number_allowed=True, strings_allowed=(),
                            min=0, inclusive_min=False, max=1, inclusive_max=False)
-input_schema.add_parameter('Feasibility', default_value='Flexible', number_allowed=False,
+input_schema.add_parameter('Feasibility', default_value='Strict', number_allowed=False,
                            strings_allowed=['Strict', 'Flexible'])
 input_schema.add_parameter('Violation Penalty', default_value=20, number_allowed=True, strings_allowed=(),
                            min=0, inclusive_min=True, max=10000, inclusive_max=True)
