@@ -1,0 +1,133 @@
+{
+  "nutrients": {
+    "columns": [
+      "Nutrient ID",
+      "Nutrient Name",
+      "Min Intake",
+      "Max Intake"
+    ],
+    "data": [
+      [
+        "n1",
+        "Calories (kcal)",
+        200,
+        2000.0
+      ],
+      [
+        "n2",
+        "Carbohydrates (g)",
+        50,
+        150.0
+      ]
+    ]
+  },
+  "foods_nutrients": {
+    "columns": [
+      "Food ID",
+      "Nutrient ID",
+      "Food Name",
+      "Nutrient Name",
+      "Quantity"
+    ],
+    "data": [
+      [
+        "f1",
+        "n1",
+        "Grapes",
+        "Calories (kcal)",
+        0.69
+      ],
+      [
+        "f2",
+        "n1",
+        "Melon",
+        "Calories (kcal)",
+        0.28
+      ],
+      [
+        "f3",
+        "n1",
+        "Watermelon",
+        "Calories (kcal)",
+        0.3
+      ],
+      [
+        "f1",
+        "n2",
+        "Grapes",
+        "Carbohydrates (g)",
+        181.0
+      ],
+      [
+        "f2",
+        "n2",
+        "Melon",
+        "Carbohydrates (g)",
+        0.0658
+      ],
+      [
+        "f3",
+        "n2",
+        "Watermelon",
+        "Carbohydrates (g)",
+        0.0755
+      ]
+    ]
+  },
+  "foods": {
+    "columns": [
+      "Food ID",
+      "Food Name",
+      "Per Unit Cost"
+    ],
+    "data": [
+      [
+        "f1",
+        "Grapes",
+        3.5
+      ],
+      [
+        "f2",
+        "Melon",
+        5.6
+      ],
+      [
+        "f3",
+        "Watermelon",
+        2.3
+      ]
+    ]
+  },
+  "parameters": {
+    "columns": [
+      "Name",
+      "Value"
+    ],
+    "data": [
+      [
+        "Food Portions",
+        "Ensure whole portions"
+      ],
+      [
+        "Food Cost Multiplier",
+        "1.5"
+      ],
+      [
+        "Time Limit",
+        "120"
+      ],
+      [
+        "MIP Gap",
+        "0.01"
+      ],
+      [
+        "Feasibility",
+        "Flexible"
+      ],
+      [
+        "Violation Penalty",
+        "10"
+      ]
+    ]
+  }
+}
