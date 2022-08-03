@@ -68,7 +68,7 @@ def write_data(sln, output_data_loc, schema):
 
 class TestLocalExecution(unittest.TestCase):
 
-    def test_action_data_ingestion(self):
+    def test_1_action_data_ingestion(self):
         # Reads the raw data and places a copy of it inside the 'data/inputs' directory.
         dat = read_data(os.path.join('testing_data', 'tiny_data.json'), mip_me.input_schema)
         self.assertTrue(mip_me.input_schema.good_pan_dat_object(dat), "bad dat check")
@@ -78,7 +78,7 @@ class TestLocalExecution(unittest.TestCase):
         self.assertDictEqual(mip_me.input_schema.find_data_row_failures(dat), dict(), "data row check")
         write_data(dat, 'inputs', mip_me.input_schema)
 
-    def test_update_food_cost(self):
+    def test_2_update_food_cost(self):
         dat = read_data('inputs', mip_me.input_schema)
         params = mip_me.input_schema.create_full_parameters_dict(dat)
         total_cost_old = params['Food Cost Multiplier'] * dat.foods['Per Unit Cost'].sum()
@@ -87,13 +87,13 @@ class TestLocalExecution(unittest.TestCase):
         self.assertTrue(close_enough, "food cost update check")
         write_data(dat_, 'inputs', mip_me.input_schema)
 
-    def test_main_solve(self):
+    def test_3_main_solve(self):
         dat = read_data('inputs', mip_me.input_schema)
         sln = mip_me.solve(dat)
         self.assertTrue(isclose(sln.buy['Quantity'].sum(), 667, rel_tol=1e-2), "total buy qty check")
         write_data(sln, 'outputs', mip_me.output_schema)
 
-    def test_report_builder(self):
+    def test_4_report_builder(self):
         dat = read_data('inputs', mip_me.input_schema)
         sln = read_data('outputs', mip_me.output_schema)
         sln = mip_me.action_report_builder.report_builder_solve(dat, sln)
