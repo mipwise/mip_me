@@ -73,7 +73,7 @@ class TestMipMe(unittest.TestCase):
         cls.dat = read_data(os.path.join('testing_data', 'tiny_data.json'), mip_me.input_schema)
 
     def test_1_action_data_ingestion(self):
-        # Reads the raw data and places a copy of it inside the 'data/inputs' directory.
+        """Ensures the input data matches the defined input schema and has no integrity issues."""
         dat = self.dat
         self.assertTrue(mip_me.input_schema.good_pan_dat_object(dat), "bad dat check")
         self.assertDictEqual(mip_me.input_schema.find_duplicates(dat), dict(), "duplicate row check")
