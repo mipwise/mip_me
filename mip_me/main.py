@@ -28,9 +28,9 @@ def solve(dat):
     yl = pulp.LpVariable.dicts(indices=J, cat=pulp.LpContinuous, lowBound=0.0, name='yl')
     for j in J:
         if nl[j] == nl[j]:
-            mdl.addConstraint(pulp.lpSum(nq.get((i, j), 0) * x[i] for i in I) >= nl[j] - yl[j], name=f'nl_{j}')
+            mdl.addConstraint(pulp.lpSum(nq.get((i, j), 0) * x[i] for i in I) >= nl[j] - yl[j], name=f'C1_{j}')
         if nu[j] == nu[j]:
-            mdl.addConstraint(pulp.lpSum(nq.get((i, j), 0) * x[i] for i in I) <= nu[j] + yu[j], name=f'nu_{j}')
+            mdl.addConstraint(pulp.lpSum(nq.get((i, j), 0) * x[i] for i in I) <= nu[j] + yu[j], name=f'C2_{j}')
         if params['Feasibility'] == 'Flexible':
             yl[j].upBound = nl[j]
         else:
