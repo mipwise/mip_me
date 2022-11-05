@@ -1,85 +1,20 @@
 import mip_me
+import utils
 import unittest
-import inspect
 import os
 from math import isclose
-
-
-def _this_directory():
-    return os.path.dirname(os.path.realpath(os.path.abspath(inspect.getsourcefile(_this_directory))))
-
-
-def read_data(input_data_loc, schema):
-    """
-    Reads data from files and populates an instance of the corresponding schema.
-
-    Parameters
-    ----------
-    input_data_loc: str
-        The location of the data set inside the `data/` directory.
-        It can be a directory containing CSV files, a xls/xlsx file, or a json file.
-    schema: PanDatFactory
-        An instance of the PanDatFactory class of ticdat.
-    Returns
-    -------
-    PanDat
-        a PanDat object populated with the tables available in the input_data_loc.
-    """
-    print(f'Reading data from: {input_data_loc}')
-    path = os.path.join(_this_directory(), "data", input_data_loc)
-    assert os.path.exists(path), f"bad path {path}"
-    if input_data_loc.endswith(".xlsx") or input_data_loc.endswith(".xls"):
-        dat = schema.xls.create_pan_dat(path)
-    elif input_data_loc.endswith("json"):
-        dat = schema.json.create_pan_dat(path)
-    else:  # read from cvs files
-        dat = schema.csv.create_pan_dat(path)
-    return dat
-
-
-def write_data(sln, output_data_loc, schema):
-    """
-    Writes data to the specified location.
-
-    Parameters
-    ----------
-    sln: PanDat
-        A PanDat object populated with the data to be written to file/files.
-    output_data_loc: str
-        A destination inside `data/` to write the data to.
-        It can be a directory (to save the data as CSV files), a xls/xlsx file, or a json file.
-    schema: PanDatFactory
-        An instance of the PanDatFactory class of ticdat compatible with sln.
-    Returns
-    -------
-    None
-    """
-    print(f'Writing data back to: {output_data_loc}')
-    path = os.path.join(_this_directory(), "data", output_data_loc)
-    # assert os.path.exists(path), f"bad path {path}"
-    if output_data_loc.endswith(".xlsx") or output_data_loc.endswith("xls"):
-        schema.xls.write_file(sln, path)
-    elif output_data_loc.endswith(".json"):
-        schema.json.write_file(sln, path)
-    else:  # write to csv files
-        schema.csv.write_directory(sln, path)
-    return None
 
 
 class TestMipMe(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.dat = read_data(os.path.join('testing_data', 'tiny_data.json'), mip_me.input_schema)
+        cls.dat = utils.read_data(os.path.join('testing_data', 'tiny_data.json'), mip_me.input_schema)
 
     def test_1_action_data_ingestion(self):
         """Ensures the input data matches the defined input schema and has no integrity issues."""
         dat = self.dat
-        self.assertTrue(mip_me.input_schema.good_pan_dat_object(dat), "bad dat check")
-        self.assertDictEqual(mip_me.input_schema.find_duplicates(dat), dict(), "duplicate row check")
-        self.assertDictEqual(mip_me.input_schema.find_foreign_key_failures(dat), dict(), "foreign key check")
-        self.assertDictEqual(mip_me.input_schema.find_data_type_failures(dat), dict(), "data type value check")
-        self.assertDictEqual(mip_me.input_schema.find_data_row_failures(dat), dict(), "data row check")
+        utils.check_data(dat, mip_me.input_schema)
 
     def test_2_update_food_cost(self):
         dat = self.dat
